@@ -1,0 +1,1 @@
+export './random-words-screen.dart';
