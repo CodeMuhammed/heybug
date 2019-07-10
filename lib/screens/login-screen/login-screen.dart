@@ -44,6 +44,7 @@ class LoginScreenState extends State<LoginScreen> {
     return AppShell(
       title: 'Login Page',
       bodyContent: _pageContent(),
+      showDrawer: false,
     );
   }
 

@@ -10,7 +10,7 @@ class User {
 
   User({this.firstName, this.lastName, this.uid, this.email, this.id});
 
-  User fromJson(Map<String, dynamic> json) {
+  factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
       firstName: json['firstName'],
