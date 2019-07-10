@@ -6,8 +6,9 @@ class _DrawerItem {
   final String id;
   final String name;
   final IconData icon;
+  final String route;
 
-  _DrawerItem({this.id, this.name, this.icon});
+  _DrawerItem({this.id, this.name, this.icon, this.route});
 }
 
 class AppShell extends StatelessWidget {
@@ -19,15 +20,15 @@ class AppShell extends StatelessWidget {
 
   final List<_DrawerItem> _drawerItems = [
     _DrawerItem(
-      id: 'user_list',
-      name: 'User List',
-      icon: Icons.supervisor_account,
-    ),
+        id: 'user_list',
+        name: 'User List',
+        icon: Icons.supervisor_account,
+        route: '/'),
     _DrawerItem(
-      id: 'bug_reports',
-      name: 'Bug Reports',
-      icon: Icons.bug_report,
-    ),
+        id: 'bug_reports',
+        name: 'Bug Reports',
+        icon: Icons.bug_report,
+        route: '/bug-report'),
   ];
 
   final AuthService _authService = new AuthService();
@@ -38,7 +39,6 @@ class AppShell extends StatelessWidget {
       this.actions,
       this.user,
       this.showDrawer});
-
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +108,7 @@ class AppShell extends StatelessWidget {
         ],
       ),
       onTap: () {
-        Navigator.pop(context);
+        Navigator.pushNamed(context, item.route);
       },
     );
   }

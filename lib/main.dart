@@ -17,6 +17,7 @@ class Dashboard extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => UserListScreen(),
+        '/bug-report': (context) => BugReportScreen(),
       },
     );
   }
