@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './screens/index.dart';
 
+// here we listen to auth state changes here
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -9,10 +10,11 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => LoginScreen(),
+        '/user-list': (context) => UserListScreen(),
       },
     );
   }
 }
 
 // This runs the main application
-void main() => (runApp(MyApp()));
+void main() => runApp(MyApp());

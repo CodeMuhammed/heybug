@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/index.dart';
+import '../../services/index.dart';
+import '../../models/index.dart';
+import 'dart:convert';
 
 enum FormModeTypes { LOGIN, SIGNUP }
 
@@ -17,7 +20,14 @@ class LoginScreenState extends State<LoginScreen> {
 
   String _email = '';
   String _password = '';
+  String _firstName = '';
+  String _lastName = '';
   String _errorMessage = '';
+
+  final _passwordController = new TextEditingController();
+
+  AuthService _authService = new AuthService();
+  FirestoreService _firestoreService = new FirestoreService();
 
   final _textStylePrimary = TextStyle(color: Colors.white, fontSize: 20);
   final _textStyleSecondary =
@@ -27,8 +37,7 @@ class LoginScreenState extends State<LoginScreen> {
       color: Colors.red,
       height: 1.0,
       fontWeight: FontWeight.w300);
-
-  final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>(debugLabel: 'LOGIN_FORM_KEY');
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +50,13 @@ class LoginScreenState extends State<LoginScreen> {
   Widget _pageContent() {
     return Stack(
       children: <Widget>[
-        _showBodyContent(),
-        _showProgress(),
+        bodyContent(),
+        progress(),
       ],
     );
   }
 
-  Widget _showBodyContent() {
+  Widget bodyContent() {
     return Container(
       padding: EdgeInsets.all(30.0),
       child: Form(
@@ -55,19 +64,43 @@ class LoginScreenState extends State<LoginScreen> {
         child: ListView(
           shrinkWrap: true,
           children: <Widget>[
-            _showLogo(),
-            _showEmailInput(),
-            _showPasswordInput(),
-            _showPrimaryButton(),
-            _showSecondaryButton(),
-            _showErrorMessage()
+            logo(),
+            formInputs(),
+            primaryButton(),
+            secondaryButton(),
+            errorMessage()
           ],
         ),
       ),
     );
   }
 
-  Widget _showProgress() {
+  Widget formInputs() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children:
+          _formMode == FormModeTypes.LOGIN ? _loginInputs() : _signUpInputs(),
+    );
+  }
+
+  List<Widget> _loginInputs() {
+    return [
+      emailInput(),
+      passwordInput(),
+    ];
+  }
+
+  List<Widget> _signUpInputs() {
+    return [
+      emailInput(),
+      firstNameInput(),
+      lastNameInput(),
+      passwordInput(),
+      passwordConfirmInput(),
+    ];
+  }
+
+  Widget progress() {
     return _isLoading
         ? Center(
             child: CircularProgressIndicator(),
@@ -78,67 +111,133 @@ class LoginScreenState extends State<LoginScreen> {
           );
   }
 
-  Widget _showLogo() {
+  Widget logo() {
     return Hero(
       tag: 'logo',
       child: Padding(
         padding: EdgeInsets.fromLTRB(0, 70, 0, 0),
         child: CircleAvatar(
           backgroundColor: Colors.transparent,
-          radius: 48.0,
+          radius: 55.0,
           child: Image.asset('assets/hey-bug.png'),
         ),
       ),
     );
   }
 
-  Widget _showEmailInput() {
+  Widget emailInput() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
       child: TextFormField(
         validator: (value) {
           return value.isEmpty ? 'Email cannot be empty' : null;
         },
+        onSaved: (value) {
+          _email = value;
+        },
         maxLines: 1,
         keyboardType: TextInputType.emailAddress,
         autofocus: false,
         decoration: InputDecoration(
-          hintText: 'Enter Email',
+          hintText: 'Email',
           icon: Icon(Icons.email),
           fillColor: Colors.grey,
         ),
-        onSaved: (value) {
-          _email = value;
-        },
       ),
     );
   }
 
-  Widget _showPasswordInput() {
+  Widget firstNameInput() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
       child: TextFormField(
         validator: (value) {
-          print(value);
+          return value.isEmpty ? 'First name is required' : null;
+        },
+        onSaved: (value) {
+          _firstName = value;
+        },
+        maxLines: 1,
+        keyboardType: TextInputType.text,
+        autofocus: false,
+        decoration: InputDecoration(
+          hintText: 'First Name',
+          icon: Icon(Icons.account_box),
+          fillColor: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget lastNameInput() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+      child: TextFormField(
+        validator: (value) {
+          return value.isEmpty ? 'Last name is required' : null;
+        },
+        onSaved: (value) {
+          _lastName = value;
+        },
+        maxLines: 1,
+        keyboardType: TextInputType.text,
+        autofocus: false,
+        decoration: InputDecoration(
+          hintText: 'Last Name',
+          icon: Icon(Icons.account_box),
+          fillColor: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget passwordInput() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+      child: TextFormField(
+        controller: _passwordController,
+        validator: (value) {
           return value.isEmpty ? 'Password cannot be empty' : null;
+        },
+        onSaved: (value) {
+          _password = value;
         },
         maxLines: 1,
         obscureText: true,
-        keyboardType: TextInputType.emailAddress,
+        keyboardType: TextInputType.text,
         autofocus: false,
         decoration: InputDecoration(
           hintText: 'Password',
           icon: Icon(Icons.lock_outline),
           fillColor: Colors.grey,
         ),
-        onSaved: (value) {
-          _password = value;
-        },
       ),
     );
   }
 
-  Widget _showPrimaryButton() {
+  Widget passwordConfirmInput() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+      child: TextFormField(
+        validator: (value) {
+          return value != _passwordController.text
+              ? 'Passwords do not match'
+              : null;
+        },
+        maxLines: 1,
+        obscureText: true,
+        keyboardType: TextInputType.text,
+        autofocus: false,
+        decoration: InputDecoration(
+          hintText: 'Confirm Password',
+          icon: Icon(Icons.verified_user),
+          fillColor: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget primaryButton() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0, 45, 0, 0),
       child: MaterialButton(
@@ -157,7 +256,7 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _showSecondaryButton() {
+  Widget secondaryButton() {
     return FlatButton(
       onPressed: () {
         _toggleFormView();
@@ -168,9 +267,9 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _showErrorMessage() {
+  Widget errorMessage() {
     if (_errorMessage.length > 0 && _errorMessage != null) {
-      return Text(_errorMessage, style: _errorMessageStyle);
+      return Center(child: Text(_errorMessage, style: _errorMessageStyle));
     } else {
       return Container(
         height: 0,
@@ -180,7 +279,6 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   _toggleFormView() {
-    _formKey.currentState.reset();
     _errorMessage = '';
 
     setState(() {
@@ -190,5 +288,52 @@ class LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  _validateAndSumbit() {}
+  bool _validateAndSave() {
+    final form = _formKey.currentState;
+    if (form.validate()) {
+      form.save();
+      return true;
+    }
+
+    return false;
+  }
+
+  void _validateAndSumbit() async {
+    setState(() {
+      _errorMessage = '';
+      _isLoading = true;
+    });
+
+    if (_validateAndSave()) {
+      try {
+        if (_formMode == FormModeTypes.LOGIN) {
+          await _authService.signin(_email, _password);
+        } else {
+          String authUID = '';
+          authUID = await _authService.signUp(_email, _password);
+
+          // here we creare a new use
+          final user = new User(
+            firstName: _firstName,
+            lastName: _lastName,
+            uid: authUID,
+            email: _email,
+          );
+
+          // here we write this value to the database
+          _firestoreService.addDoc('/users', user.toJSon());
+        }
+
+        // here we go to the dashboard
+        Navigator.pushNamed(context, '/user-list');
+      } catch (e) {
+        print(e);
+        _errorMessage = 'Error authenticating user';
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 }

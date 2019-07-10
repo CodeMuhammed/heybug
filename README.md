@@ -9,3 +9,7 @@ open ios/Runner.xcworkspace
 # with the google-info.plist, 
 for ios we copy the file into the ios/runner file.
 Then we open xcode and also drag the reference to the file in our project to the runner file in xcode
+
+
+# useful resource
+https://github.com/flutter/plugins/blob/master/packages/firebase_auth/example/lib/signin_page.dart
