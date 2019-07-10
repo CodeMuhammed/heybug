@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
-typedef CollectionReference QueryFunction(CollectionReference ref);
+typedef Query QueryFunction(CollectionReference ref);
 
 class FirestoreService {
   Future<DocumentReference> addDoc(String col, Map<String, dynamic> doc) {

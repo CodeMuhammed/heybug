@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:heybug/models/index.dart';
 import 'package:heybug/services/authentication.service.dart';
 
 class _DrawerItem {
@@ -14,6 +15,7 @@ class AppShell extends StatelessWidget {
   final String title;
   final List<Widget> actions;
   final bool showDrawer;
+  final User user;
 
   final List<_DrawerItem> _drawerItems = [
     _DrawerItem(
@@ -29,12 +31,14 @@ class AppShell extends StatelessWidget {
   ];
 
   final AuthService _authService = new AuthService();
-  
+
   AppShell(
       {@required this.bodyContent,
       @required this.title,
       this.actions,
+      this.user,
       this.showDrawer});
+
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +58,10 @@ class AppShell extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName: Text("John Doe"),
-            accountEmail: Text('examplemail@gmail.com'),
+            accountName: Text('${user.firstName} ${user.lastName}'),
+            accountEmail: Text('${user.email}'),
             currentAccountPicture: CircleAvatar(
-              child: Text('A'),
+              child: Text(user.firstName[0]),
             ),
             otherAccountsPictures: <Widget>[
               IconButton(

@@ -326,7 +326,7 @@ class LoginScreenState extends State<LoginScreen> {
         }
 
         // here we go to the dashboard
-        Navigator.pushNamed(context, '/user-list');
+        Navigator.pushNamed(context, '/');
       } catch (e) {
         print(e);
         _errorMessage = 'Error authenticating user';
