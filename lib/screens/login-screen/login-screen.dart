@@ -324,9 +324,6 @@ class LoginScreenState extends State<LoginScreen> {
           // here we write this value to the database
           _firestoreService.addDoc('/users', user.toJSon());
         }
-
-        // here we go to the dashboard
-        Navigator.pushNamed(context, '/');
       } catch (e) {
         print(e);
         _errorMessage = 'Error authenticating user';
