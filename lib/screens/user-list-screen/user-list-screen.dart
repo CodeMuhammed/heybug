@@ -15,8 +15,9 @@ class UserListScreen extends StatefulWidget {
 }
 
 class UserListScreenState extends State<UserListScreen> {
-  bool _hasData = false;
-  List<User> _users;
+  bool _pageLoading = false;
+  bool _pageAsyncProgress = false;
+  List<User> _users = [];
   User _currentUser;
 
   FirestoreService _firestoreService = new FirestoreService();
@@ -35,8 +36,8 @@ class UserListScreenState extends State<UserListScreen> {
   Widget build(BuildContext context) {
     return new AppShell(
       title: 'Users List',
-      bodyContent: _hasData ? _showUserList() : _progress(),
-      showDrawer: _currentUser != null ? true : false,
+      bodyContent: _pageLoading ? _progress() : _showUserList(),
+      showDrawer: _currentUser != null,
       user: _currentUser,
     );
   }
@@ -45,7 +46,7 @@ class UserListScreenState extends State<UserListScreen> {
     _firestoreService.$colWithIds('/users', (ref) => ref).listen((docs) {
       setState(() {
         _users = docs.map((doc) => User.fromJson(doc)).toList();
-        _hasData = true;
+        _pageLoading = false;
       });
     });
 
@@ -67,15 +68,22 @@ class UserListScreenState extends State<UserListScreen> {
   }
 
   Widget _showUserList() {
-    return ListView.separated(
-      padding: EdgeInsets.all(8.0),
-      itemBuilder: (BuildContext context, int index) {
-        return _userListItem(_users[index], context);
-      },
-      separatorBuilder: (BuildContext context, int index) {
-        return Divider();
-      },
-      itemCount: _users.length,
+    return Column(
+      children: <Widget>[
+        _pageAsyncProgress ? LinearProgressIndicator() : EmptyWidget(),
+        Expanded(
+          child: ListView.separated(
+            padding: EdgeInsets.all(8.0),
+            itemBuilder: (BuildContext context, int index) {
+              return _userListItem(_users[index], context);
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              return Divider();
+            },
+            itemCount: _users.length,
+          ),
+        ),
+      ],
     );
   }
 
@@ -96,8 +104,16 @@ class UserListScreenState extends State<UserListScreen> {
             String text = _textFieldController.text.trim();
 
             if (text.length > 0) {
+              setState(() {
+                _pageAsyncProgress = true;
+              });
+
               await _sendNotificationToUser(user, text);
               _textFieldController.clear();
+
+              setState(() {
+                _pageAsyncProgress = false;
+              });
 
               Scaffold.of(context).showSnackBar(
                 SnackBar(content: Text('Alert sent to ${user.firstName}')),
@@ -111,6 +127,7 @@ class UserListScreenState extends State<UserListScreen> {
 
   Future<void> _displayDialog(User user) {
     return showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -120,6 +137,12 @@ class UserListScreenState extends State<UserListScreen> {
             decoration: InputDecoration(hintText: "Enter short text"),
           ),
           actions: <Widget>[
+            FlatButton(
+              child: Text('Cancel'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+              },
+            ),
             RaisedButton(
               child: Text('Send', style: TextStyle(color: Colors.white)),
               onPressed: () async {
@@ -132,12 +155,12 @@ class UserListScreenState extends State<UserListScreen> {
     );
   }
 
-  Future<HttpsCallableResult> _sendNotificationToUser(User user, String message) {
+  Future<HttpsCallableResult> _sendNotificationToUser(
+      User user, String message) {
     final NotificationPayload payload = new NotificationPayload(
-      fullName: '${user.firstName} ${user.lastName}',
-      image: '',
-      message: message
-    );
+        fullName: '${user.firstName} ${user.lastName}',
+        image: '',
+        message: message);
 
     return _functionsService.sendNotificationToUser(payload);
   }

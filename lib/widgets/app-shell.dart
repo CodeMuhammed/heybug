@@ -11,6 +11,14 @@ class _DrawerItem {
   _DrawerItem({this.id, this.name, this.icon, this.route});
 }
 
+class EmptyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(width: 0, height: 0,);
+  }
+}
+
+
 class AppShell extends StatelessWidget {
   final Widget bodyContent;
   final String title;
