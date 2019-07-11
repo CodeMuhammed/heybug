@@ -21,7 +21,7 @@ class User {
   }
 
   Map<String, dynamic> toJSon() {
-    final userJson = {
+    final jsonData = {
       'firstName': this.firstName,
       'lastName': this.lastName,
       'uid': this.uid,
@@ -29,9 +29,9 @@ class User {
     };
 
     if (this.id != null) {
-      userJson['id'] = this.id;
+      jsonData['id'] = this.id;
     }
 
-    return userJson;
+    return jsonData;
   }
 }

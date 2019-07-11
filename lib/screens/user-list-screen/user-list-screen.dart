@@ -1,6 +1,8 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:heybug/services/functions.service.dart';
 import '../../widgets/index.dart';
 import '../../services/index.dart';
 import '../../models/index.dart';
@@ -19,6 +21,8 @@ class UserListScreenState extends State<UserListScreen> {
 
   FirestoreService _firestoreService = new FirestoreService();
   AuthService _authService = new AuthService();
+  FunctionsService _functionsService = new FunctionsService();
+
   TextEditingController _textFieldController = TextEditingController();
 
   @override
@@ -89,10 +93,10 @@ class UserListScreenState extends State<UserListScreen> {
           onPressed: () async {
             await _displayDialog(user);
 
-            String text = _textFieldController.text;
+            String text = _textFieldController.text.trim();
 
             if (text.length > 0) {
-              await _sendNotificationToUser(user);
+              await _sendNotificationToUser(user, text);
               _textFieldController.clear();
 
               Scaffold.of(context).showSnackBar(
@@ -128,7 +132,13 @@ class UserListScreenState extends State<UserListScreen> {
     );
   }
 
-  Future<void> _sendNotificationToUser(User user) {
-    return null;
+  Future<HttpsCallableResult> _sendNotificationToUser(User user, String message) {
+    final NotificationPayload payload = new NotificationPayload(
+      fullName: '${user.firstName} ${user.lastName}',
+      image: '',
+      message: message
+    );
+
+    return _functionsService.sendNotificationToUser(payload);
   }
 }
