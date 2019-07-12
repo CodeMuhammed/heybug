@@ -74,13 +74,14 @@ class AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: Text('$widget.title'),
-          actions: widget.actions,
-        ),
-        drawer: _user != null ? _drawer(context) : null,
-        body: widget.bodyContent);
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: Text('$widget.title'),
+        actions: widget.actions,
+      ),
+      drawer: _user != null ? _drawer(context) : null,
+      body: widget.bodyContent,
+    );
   }
 
   void _getUserData() async {

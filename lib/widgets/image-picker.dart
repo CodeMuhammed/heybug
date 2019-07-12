@@ -59,6 +59,8 @@ class CustomImagePickerState extends State<CustomImagePicker> {
       setState(() {
         _savingImage = true;
       });
+
+      // here we handle the upload
     }
   }
 }
