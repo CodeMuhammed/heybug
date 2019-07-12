@@ -30,8 +30,6 @@ class DashboardState extends State<Dashboard> {
 
     if (Platform.isIOS) {
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
-        print(data);
-        print('Here');
         _saveDeviceToken();
       });
 

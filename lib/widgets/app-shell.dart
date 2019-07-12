@@ -88,7 +88,10 @@ class AppShellState extends State<AppShell> {
     FirebaseUser authUser = await _authService.getCurrentUser();
 
     if (authUser != null) {
-      _user = await _userService.getUserByEmail(authUser.email);
+      User user = await _userService.getUserByEmail(authUser.email);
+      setState(() {
+        _user = user;
+      });
     }
   }
 
