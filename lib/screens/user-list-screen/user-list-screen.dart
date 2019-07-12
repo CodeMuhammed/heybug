@@ -1,8 +1,8 @@
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:heybug/services/functions.service.dart';
+import 'package:heybug/widgets/empty.dart';
 import '../../widgets/index.dart';
 import '../../services/index.dart';
 import '../../models/index.dart';
@@ -15,30 +15,38 @@ class UserListScreen extends StatefulWidget {
 }
 
 class UserListScreenState extends State<UserListScreen> {
-  bool _pageLoading = false;
+  // instance variables
+  bool _pageLoading = true;
   bool _pageAsyncProgress = false;
   List<User> _users = [];
-  User _currentUser;
 
+  // Injected services
   FirestoreService _firestoreService = new FirestoreService();
-  AuthService _authService = new AuthService();
   FunctionsService _functionsService = new FunctionsService();
 
+  // Text input controller
   TextEditingController _textFieldController = TextEditingController();
+
+  // The reason why we override this is to make sure
+  // that the widget is in view before calling setState
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void initState() {
-    super.initState();
     _getWidgetData();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return new AppShell(
+    return AppShell(
       title: 'Users List',
       bodyContent: _pageLoading ? _progress() : _showUserList(),
-      showDrawer: _currentUser != null,
-      user: _currentUser,
     );
   }
 
@@ -47,16 +55,6 @@ class UserListScreenState extends State<UserListScreen> {
       setState(() {
         _users = docs.map((doc) => User.fromJson(doc)).toList();
         _pageLoading = false;
-      });
-    });
-
-    FirebaseUser authUser = await _authService.getCurrentUser();
-    _firestoreService.$colWithIds('/users', (ref) {
-      return ref.where('email', isEqualTo: authUser.email);
-    }).listen((docs) {
-      var data = docs.map((doc) => User.fromJson(doc)).toList();
-      setState(() {
-        _currentUser = data[0];
       });
     });
   }
@@ -156,10 +154,12 @@ class UserListScreenState extends State<UserListScreen> {
   }
 
   Future<HttpsCallableResult> _sendNotificationToUser(
-      User user, String message) {
+    User user,
+    String message,
+  ) {
     final NotificationPayload payload = new NotificationPayload(
         fullName: '${user.firstName} ${user.lastName}',
-        image: '',
+        image: user.picture,
         message: message);
 
     return _functionsService.sendNotificationToUser(payload);

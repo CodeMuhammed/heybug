@@ -1,6 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:heybug/models/index.dart';
 import 'package:heybug/services/authentication.service.dart';
+import 'package:heybug/services/index.dart';
+import 'package:heybug/widgets/empty.dart';
+import './image-picker.dart';
 
 class _DrawerItem {
   final String id;
@@ -11,20 +15,28 @@ class _DrawerItem {
   _DrawerItem({this.id, this.name, this.icon, this.route});
 }
 
-class EmptyWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(width: 0, height: 0,);
-  }
-}
-
-
-class AppShell extends StatelessWidget {
+class AppShell extends StatefulWidget {
   final Widget bodyContent;
   final String title;
   final List<Widget> actions;
-  final bool showDrawer;
-  final User user;
+
+  AppShell({
+    @required this.bodyContent,
+    @required this.title,
+    this.actions,
+  });
+
+  @override
+  AppShellState createState() {
+    return AppShellState();
+  }
+}
+
+class AppShellState extends State<AppShell> {
+  final AuthService _authService = new AuthService();
+  final FirestoreService _firestoreService = new FirestoreService();
+  User _user;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   final List<_DrawerItem> _drawerItems = [
     _DrawerItem(
@@ -39,25 +51,51 @@ class AppShell extends StatelessWidget {
         route: '/bug-report'),
   ];
 
-  final AuthService _authService = new AuthService();
+  CustomImagePicker _customImagePicker;
 
-  AppShell(
-      {@required this.bodyContent,
-      @required this.title,
-      this.actions,
-      this.user,
-      this.showDrawer});
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // @performance optimization
+    // 1. stateful widgets should not be iinitialized directly from the build method
+    // 2. when splitting widgets, split them into smaller stateless widget classes not functions
+    _customImagePicker = CustomImagePicker();
+    _getUserData();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('$title'),
-        actions: actions,
-      ),
-      drawer: showDrawer ? _drawer(context) : null,
-      body: bodyContent,
-    );
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: Text('$widget.title'),
+          actions: widget.actions,
+        ),
+        drawer: _user != null ? _drawer(context) : null,
+        body: widget.bodyContent);
+  }
+
+  void _getUserData() async {
+    FirebaseUser authUser = await _authService.getCurrentUser();
+
+    if (authUser != null) {
+      _firestoreService.$colWithIds('/users', (ref) {
+        return ref.where('email', isEqualTo: authUser.email);
+      }).listen((docs) {
+        var data = docs.map((doc) => User.fromJson(doc)).toList();
+        setState(() {
+          _user = data[0];
+        });
+      });
+    }
   }
 
   Widget _drawer(BuildContext context) {
@@ -66,10 +104,29 @@ class AppShell extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName: Text('${user.firstName} ${user.lastName}'),
-            accountEmail: Text('${user.email}'),
-            currentAccountPicture: CircleAvatar(
-              child: Text(user.firstName[0]),
+            accountName: Text('${_user.firstName} ${_user.lastName}'),
+            accountEmail: Text('${_user.email}'),
+            currentAccountPicture: InkWell(
+              child: GestureDetector(
+                child: _user.picture.isNotEmpty
+                    ? CircleAvatar(
+                        radius: 55.0,
+                        backgroundImage: NetworkImage('assets/hey-bug.png'),
+                      )
+                    : CircleAvatar(
+                        radius: 55.0,
+                        child: Text(
+                          '${_user.firstName[0].toUpperCase()} ${_user.lastName[0].toUpperCase()}',
+                        ),
+                      ),
+                onTap: () {
+                  // close the sidenav
+                  Navigator.of(context).pop();
+
+                  // show the buttom sheet
+                  _showButtomSheet();
+                },
+              ),
             ),
             otherAccountsPictures: <Widget>[
               IconButton(
@@ -89,10 +146,14 @@ class AppShell extends StatelessWidget {
     );
   }
 
+  _showButtomSheet() {
+    _scaffoldKey.currentState.showBottomSheet((BuildContext context) {
+      return _customImagePicker;
+    });
+  }
+
   List<Widget> _showDrawerItems(BuildContext context) {
-    return _drawerItems.map((item) {
-      return _drawerItem(context, item);
-    }).toList();
+    return _drawerItems.map((item) => _drawerItem(context, item)).toList();
   }
 
   Widget _drawerItem(BuildContext context, _DrawerItem item) {

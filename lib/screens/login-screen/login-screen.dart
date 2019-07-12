@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../widgets/index.dart';
 import '../../services/index.dart';
 import '../../models/index.dart';
-import 'dart:convert';
 
 enum FormModeTypes { LOGIN, SIGNUP }
 
@@ -44,7 +43,6 @@ class LoginScreenState extends State<LoginScreen> {
     return AppShell(
       title: 'Login Page',
       bodyContent: _pageContent(),
-      showDrawer: false,
     );
   }
 
@@ -319,6 +317,7 @@ class LoginScreenState extends State<LoginScreen> {
             lastName: _lastName,
             uid: authUID,
             email: _email,
+            picture: ''
           );
 
           // here we write this value to the database

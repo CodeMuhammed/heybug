@@ -7,8 +7,9 @@ class User {
   final String lastName;
   final String uid;
   final String email;
+  final String picture;
 
-  User({this.firstName, this.lastName, this.uid, this.email, this.id});
+  User({this.firstName, this.lastName, this.uid, this.email, this.id, this.picture});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -17,6 +18,7 @@ class User {
       lastName: json['lastName'],
       uid: json['uid'],
       email: json['email'],
+      picture: json['picture']
     );
   }
 
@@ -26,6 +28,7 @@ class User {
       'lastName': this.lastName,
       'uid': this.uid,
       'email': this.email,
+      'picture': this.picture
     };
 
     if (this.id != null) {
