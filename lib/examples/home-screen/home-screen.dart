@@ -47,8 +47,6 @@ class Photo {
 class HomeScreen extends StatelessWidget {
   @override
   build(BuildContext context) {
-    Future<Post> _post = fetchData();
-
     // The advantages of this approach is that. the app shell,
     // serves like a container that can be used as a resuable widget
     // The page routed to first automatically sets the dynamic variables needed by the app bar

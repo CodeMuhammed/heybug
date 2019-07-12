@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:heybug/models/index.dart';
 import 'package:heybug/services/authentication.service.dart';
 import 'package:heybug/services/index.dart';
-import 'package:heybug/widgets/empty.dart';
+import 'package:heybug/services/user.service.dart';
 import './image-picker.dart';
 
 class _DrawerItem {
@@ -34,7 +34,7 @@ class AppShell extends StatefulWidget {
 
 class AppShellState extends State<AppShell> {
   final AuthService _authService = new AuthService();
-  final FirestoreService _firestoreService = new FirestoreService();
+  final UserService _userService = new UserService();
   User _user;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -76,7 +76,7 @@ class AppShellState extends State<AppShell> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('$widget.title'),
+        title: Text('${widget.title}'),
         actions: widget.actions,
       ),
       drawer: _user != null ? _drawer(context) : null,
@@ -88,14 +88,7 @@ class AppShellState extends State<AppShell> {
     FirebaseUser authUser = await _authService.getCurrentUser();
 
     if (authUser != null) {
-      _firestoreService.$colWithIds('/users', (ref) {
-        return ref.where('email', isEqualTo: authUser.email);
-      }).listen((docs) {
-        var data = docs.map((doc) => User.fromJson(doc)).toList();
-        setState(() {
-          _user = data[0];
-        });
-      });
+      _user = await _userService.getUserByEmail(authUser.email);
     }
   }
 

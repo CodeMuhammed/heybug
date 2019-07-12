@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:heybug/services/user.service.dart';
 import '../../widgets/index.dart';
 import '../../services/index.dart';
 import '../../models/index.dart';
@@ -26,7 +27,7 @@ class LoginScreenState extends State<LoginScreen> {
   final _passwordController = new TextEditingController();
 
   AuthService _authService = new AuthService();
-  FirestoreService _firestoreService = new FirestoreService();
+  UserService _userService = new UserService();
 
   final _textStylePrimary = TextStyle(color: Colors.white, fontSize: 20);
   final _textStyleSecondary =
@@ -317,11 +318,13 @@ class LoginScreenState extends State<LoginScreen> {
             lastName: _lastName,
             uid: authUID,
             email: _email,
-            picture: ''
+            picture: '',
+            fcmToken: '',
+            fcmPlatform: '',
           );
 
           // here we write this value to the database
-          _firestoreService.addDoc('/users', user.toJSon());
+          _userService.addUser(user);
         }
       } catch (e) {
         print(e);

@@ -3,13 +3,23 @@ import 'package:json_annotation/json_annotation.dart';
 @JsonSerializable(nullable: false)
 class User {
   final String id;
-  final String firstName;
-  final String lastName;
-  final String uid;
-  final String email;
-  final String picture;
+  String firstName;
+  String lastName;
+  String uid;
+  String email;
+  String picture;
+  String fcmToken;
+  String fcmPlatform;
 
-  User({this.firstName, this.lastName, this.uid, this.email, this.id, this.picture});
+  User(
+      {this.firstName,
+      this.lastName,
+      this.uid,
+      this.email,
+      this.id,
+      this.picture,
+      this.fcmToken,
+      this.fcmPlatform});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -18,7 +28,9 @@ class User {
       lastName: json['lastName'],
       uid: json['uid'],
       email: json['email'],
-      picture: json['picture']
+      picture: json['picture'],
+      fcmToken: json['fcmToken'],
+      fcmPlatform: json['fcmPlatform'],
     );
   }
 
@@ -28,7 +40,9 @@ class User {
       'lastName': this.lastName,
       'uid': this.uid,
       'email': this.email,
-      'picture': this.picture
+      'picture': this.picture,
+      'fcmToken': this.fcmToken,
+      'fcmPlatform': this.fcmPlatform,
     };
 
     if (this.id != null) {

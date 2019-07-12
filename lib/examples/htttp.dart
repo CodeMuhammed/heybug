@@ -47,8 +47,6 @@ class Photo {
 class HomeScreen extends StatelessWidget {
   @override
   build(BuildContext context) {
-    Future<Post> _post = fetchData();
-
     // The advantages of this approach is that. the app shell,
     // serves like a container that can be used as a resuable widget
     // The page routed to first automatically sets the dynamic variables needed by the app bar
@@ -66,7 +64,7 @@ class HomeScreen extends StatelessWidget {
           future: fetchPhotos(http.Client()),
           builder: (context, snapshot) {
             return snapshot.hasData
-                ? PhotoList(snapshot.data)
+                ? photoList(snapshot.data)
                 : CircularProgressIndicator();
           },
         ),
@@ -74,7 +72,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget PhotoList(List<Photo> photos) {
+  Widget photoList(List<Photo> photos) {
     return GridView.builder(
       gridDelegate:
           SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),

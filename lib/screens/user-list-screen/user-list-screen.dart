@@ -2,9 +2,9 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:heybug/services/functions.service.dart';
+import 'package:heybug/services/user.service.dart';
 import 'package:heybug/widgets/empty.dart';
 import '../../widgets/index.dart';
-import '../../services/index.dart';
 import '../../models/index.dart';
 
 class UserListScreen extends StatefulWidget {
@@ -21,7 +21,7 @@ class UserListScreenState extends State<UserListScreen> {
   List<User> _users = [];
 
   // Injected services
-  FirestoreService _firestoreService = new FirestoreService();
+  UserService _userService = new UserService();
   FunctionsService _functionsService = new FunctionsService();
 
   // Text input controller
@@ -51,9 +51,9 @@ class UserListScreenState extends State<UserListScreen> {
   }
 
   _getWidgetData() async {
-    _firestoreService.$colWithIds('/users', (ref) => ref).listen((docs) {
+    _userService.getAllUsers().listen((docs) {
       setState(() {
-        _users = docs.map((doc) => User.fromJson(doc)).toList();
+        _users = docs;
         _pageLoading = false;
       });
     });
@@ -158,9 +158,11 @@ class UserListScreenState extends State<UserListScreen> {
     String message,
   ) {
     final NotificationPayload payload = new NotificationPayload(
-        fullName: '${user.firstName} ${user.lastName}',
-        image: user.picture,
-        message: message);
+      fullName: '${user.firstName} ${user.lastName}',
+      image: user.picture,
+      message: message,
+      target: user.fcmToken,
+    );
 
     return _functionsService.sendNotificationToUser(payload);
   }

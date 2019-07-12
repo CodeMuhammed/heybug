@@ -13,3 +13,4 @@ Then we open xcode and also drag the reference to the file in our project to the
 
 # useful resource
 https://github.com/flutter/plugins/blob/master/packages/firebase_auth/example/lib/signin_page.dart
+https://github.com/fireship-io/192-flutter-fcm-push-notifications/blob/master/lib/main.dart

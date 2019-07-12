@@ -60,11 +60,10 @@ class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             _buildTextComposer()
           ],
         ),
-        decoration: Platform.isIOS ? BoxDecoration(
-          border: Border(
-            top: BorderSide(color: Colors.grey[200])
-          )
-        ) : null,
+        decoration: Platform.isIOS
+            ? BoxDecoration(
+                border: Border(top: BorderSide(color: Colors.grey[200])))
+            : null,
       ),
     );
   }
@@ -80,11 +79,11 @@ class ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               child: TextField(
                 controller: _textController,
                 onSubmitted: _handleSubmit,
-                onChanged: (String text) => {
-                      setState(() {
-                        _isComposing = text.length > 0;
-                      })
-                    },
+                onChanged: (String text) {
+                  setState(() {
+                    _isComposing = text.length > 0;
+                  });
+                },
                 decoration:
                     InputDecoration.collapsed(hintText: 'Send a message'),
               ),
