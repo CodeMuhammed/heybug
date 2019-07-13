@@ -18,10 +18,10 @@ class LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   FormModeTypes _formMode = FormModeTypes.LOGIN;
 
-  String _email = '';
-  String _password = '';
   String _firstName = '';
   String _lastName = '';
+  String _email = '';
+  String _password = '';
   String _errorMessage = '';
 
   final _passwordController = new TextEditingController();
@@ -280,6 +280,7 @@ class LoginScreenState extends State<LoginScreen> {
 
   _toggleFormView() {
     _errorMessage = '';
+    _formKey.currentState.reset();
 
     setState(() {
       _formMode = _formMode == FormModeTypes.LOGIN
@@ -288,23 +289,17 @@ class LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  bool _validateAndSave() {
-    final form = _formKey.currentState;
-    if (form.validate()) {
-      form.save();
-      return true;
-    }
-
-    return false;
-  }
-
   void _validateAndSumbit() async {
+    final form = _formKey.currentState;
+
     setState(() {
       _errorMessage = '';
       _isLoading = true;
     });
 
-    if (_validateAndSave()) {
+    if (form.validate()) {
+      form.save();
+
       try {
         if (_formMode == FormModeTypes.LOGIN) {
           await _authService.signin(_email, _password);

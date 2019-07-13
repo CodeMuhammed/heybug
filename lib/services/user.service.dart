@@ -31,7 +31,9 @@ class UserService {
   Future<User> getUserByEmail(String email) {
     Completer<User> userFuture = new Completer();
     _firestoreService
-        .$colWithIds('/users', (ref) => ref)
+        .$colWithIds('/users', (ref) {
+          return ref.where('email', isEqualTo: email);
+        })
         .take(1)
         .listen((docs) {
       List<User> users = docs.map((doc) => User.fromJson(doc)).toList();

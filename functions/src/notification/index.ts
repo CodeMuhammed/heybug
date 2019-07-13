@@ -5,7 +5,7 @@ import { NotificationPayload } from '../models';
 import * as admin from 'firebase-admin';
 admin.initializeApp();
 
-const fcm = admin.messaging();
+const fcm: admin.messaging.Messaging = admin.messaging();
 const defaultLogo = 'https://firebasestorage.googleapis.com/v0/b/hey-bug.appspot.com/o/hey-bug.png?alt=media&token=88d93291-dd62-4090-84f5-706fee44df3f';
 
 export const sendNotificationHandler = functions.https.onCall(async (data: NotificationPayload, context) => {
@@ -19,13 +19,14 @@ export const sendNotificationHandler = functions.https.onCall(async (data: Notif
                 title: `Message from ${data.fullName}`,
                 body: data.message,
                 icon: data.image || defaultLogo,
-                click_action: 'FLUTTER_NOTIFICATION_CLICK'
-            }
+                click_action: 'FLUTTER_NOTIFICATION_CLICK',
+                sound: 'default'
+            },
         };
 
         if (data.target) {
             try {
-                await fcm.sendToDevice([data.target], payload);
+                await fcm.sendToDevice(data.target, payload);
             } catch (e) {
                 console.log(e);
             }
